@@ -40,7 +40,9 @@ class ImagesFragment : BaseFragment(), IImagesView {
     @ProvidePresenter
     fun providePresenter(): ImagesPresenter = daggerPresenter.get()
 
-    val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE=111
+    companion object {
+        private const val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 111
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,7 +54,9 @@ class ImagesFragment : BaseFragment(), IImagesView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAdapter()
+        if (requestPermission()) {
+            initAdapter()
+        }
     }
 
     private fun initAdapter() {
@@ -63,10 +67,7 @@ class ImagesFragment : BaseFragment(), IImagesView {
         val gridLayoutManager = GridLayoutManager(requireContext(), spanCount)
         rvViewImages.layoutManager = gridLayoutManager
 
-
-
         context?.let {
-            requestPermission()
             val pathImages = ImagesPath.getAllImagesPath(it?.contentResolver);
 
             val onClick: (View, Int, Bitmap) -> Unit =
@@ -119,49 +120,55 @@ class ImagesFragment : BaseFragment(), IImagesView {
         return ArrayList(value.split(",").map { it })
     }
 
-    fun requestPermission(){
+    private fun requestPermission(): Boolean {
+        var isGranted = false
         context?.let {
-            // Here, thisActivity is the current activity
-            if (ContextCompat.checkSelfPermission(it,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-
-               it.activity()?.let {
-                   // Permission is not granted
-                   // Should we show an explanation?
-                   if (ActivityCompat.shouldShowRequestPermissionRationale(
-                           it,
-                           Manifest.permission.READ_CONTACTS
-                       )
-                   ) {
-                       // Show an explanation to the user *asynchronously* -- don't block
-                       // this thread waiting for the user's response! After the user
-                       // sees the explanation, try again to request the permission.
-                   } else {
-                       // No explanation needed, we can request the permission.
-                       ActivityCompat.requestPermissions(
-                           it,
-                           arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                           MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE
-                       )
-
-                       // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                       // app-defined int constant. The callback method gets the
-                       // result of the request.
-                   }
-               }
-            }
-                else {
-                    // Permission has already been granted
+            if (ContextCompat.checkSelfPermission(
+                    it,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                it.activity()?.let {
+                    // Permission is not granted
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(
+                            it,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        )
+                    ) {
+                        // Show an explanation to the user *asynchronously* -- don't block
+                        // this thread waiting for the user's response! After the user
+                        // sees the explanation, try again to request the permission.
+                    } else {
+                        requestPermissions(
+                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE
+                        )
+                    }
                 }
-               }
-
+            } else {
+                isGranted = true
+            }
         }
-
-
+        return isGranted
     }
-    tailrec fun Context.activity(): Activity? = when {
-        this is Activity -> this
-        else -> (this as? ContextWrapper)?.baseContext?.activity()
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    initAdapter()
+                }
+                return
+            }
+        }
     }
+}
+
+tailrec fun Context.activity(): Activity? = when {
+    this is Activity -> this
+    else -> (this as? ContextWrapper)?.baseContext?.activity()
+}

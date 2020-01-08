@@ -1,12 +1,8 @@
 package com.example.imgur.data.helpers
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentResolver
-import android.content.pm.PackageManager
 import android.provider.MediaStore
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import java.util.*
 
 object ImagesPath {
