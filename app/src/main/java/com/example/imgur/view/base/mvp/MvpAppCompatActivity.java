@@ -1,5 +1,6 @@
 package com.example.imgur.view.base.mvp;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import com.arellomobile.mvp.MvpDelegate;
  *
  * @author Vova Stelmashchuk
  */
+@SuppressLint("Registered")
 @SuppressWarnings("unused")
 public class MvpAppCompatActivity extends AppCompatActivity {
     private MvpDelegate<? extends MvpAppCompatActivity> mMvpDelegate;

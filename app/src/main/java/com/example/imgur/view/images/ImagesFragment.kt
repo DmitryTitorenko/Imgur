@@ -59,6 +59,27 @@ class ImagesFragment : BaseFragment(), IImagesView {
         }
     }
 
+    override fun handleUploadImage(image: Image) {
+        Toast.makeText(context, image.success.toString(), Toast.LENGTH_LONG).show()
+        image.data?.link?.let {
+            storeLinks(it)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    initAdapter()
+                }
+                return
+            }
+        }
+    }
+
     private fun initAdapter() {
         rvViewImages.setHasFixedSize(true)
         val spanCount =
@@ -68,11 +89,11 @@ class ImagesFragment : BaseFragment(), IImagesView {
         rvViewImages.layoutManager = gridLayoutManager
 
         context?.let {
-            val pathImages = ImagesPath.getAllImagesPath(it?.contentResolver);
+            val pathImages = ImagesPath.getAllImagesPath(it.contentResolver)
 
             val onClick: (View, Int, Bitmap) -> Unit =
-                { view: View, position: Int, bitmap: Bitmap ->
-                    Toast.makeText(context, pathImages.get(position), Toast.LENGTH_SHORT).show()
+                { _: View, position: Int, bitmap: Bitmap ->
+                    Toast.makeText(context, pathImages[position], Toast.LENGTH_SHORT).show()
                     presenter.uploadImage(EncodeImageToBase64.encode(bitmap))
                 }
 
@@ -82,13 +103,6 @@ class ImagesFragment : BaseFragment(), IImagesView {
         btn_upload.setOnClickListener {
             view?.findNavController()
                 ?.navigate(R.id.action_imageFragment_to_linksFragment)
-        }
-    }
-
-    override fun handleUploadImage(image: Image) {
-        Toast.makeText(context, image.success.toString(), Toast.LENGTH_LONG).show()
-        image.data?.link?.let {
-            storeLinks(it)
         }
     }
 
@@ -151,20 +165,6 @@ class ImagesFragment : BaseFragment(), IImagesView {
             }
         }
         return isGranted
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
-    ) {
-        when (requestCode) {
-            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    initAdapter()
-                }
-                return
-            }
-        }
     }
 }
 

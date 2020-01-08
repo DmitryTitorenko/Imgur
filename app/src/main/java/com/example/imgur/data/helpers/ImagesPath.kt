@@ -13,7 +13,6 @@ object ImagesPath {
      *
      * @return the paths of images.
      */
-
     @SuppressLint("Recycle")
     fun getAllImagesPath(contentResolver: ContentResolver): ArrayList<String> {
         val externalUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
