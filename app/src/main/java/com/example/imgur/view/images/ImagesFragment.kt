@@ -66,6 +66,7 @@ class ImagesFragment : BaseFragment(), IImagesView {
 
 
         context?.let {
+            requestPermission()
             val pathImages = ImagesPath.getAllImagesPath(it?.contentResolver);
 
             val onClick: (View, Int, Bitmap) -> Unit =
